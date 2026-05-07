@@ -1,0 +1,19 @@
+// Merge this into ~/.claude/settings.json under the `hooks` key.
+// If `hooks` already exists, merge `SessionEnd` into the existing array (don't replace it).
+// Replace <VAULT_PATH> with your actual vault path.
+
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 <VAULT_PATH>/llmzone/shared/scripts/index_rebuild.py >/dev/null 2>&1 || true",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}

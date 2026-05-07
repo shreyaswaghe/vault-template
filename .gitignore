@@ -1,0 +1,5 @@
+.obsidian/
+
+# Python script bytecode (from llmzone/shared/scripts/)
+__pycache__/
+*.pyc
