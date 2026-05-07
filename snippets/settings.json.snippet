@@ -1,6 +1,10 @@
 // Merge this into ~/.claude/settings.json under the `hooks` key.
 // If `hooks` already exists, merge `SessionEnd` into the existing array (don't replace it).
 // Replace <VAULT_PATH> with your actual vault path.
+//
+// `--gh-sync` makes the hook also call `gh pr view` for each PR note, syncing
+// each PR's status/branch from GitHub. Drop the flag if you don't want network
+// activity on session end (or if `gh` isn't installed/authenticated for you).
 
 {
   "hooks": {
@@ -9,7 +13,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 <VAULT_PATH>/llmzone/shared/scripts/index_rebuild.py >/dev/null 2>&1 || true",
+            "command": "python3 <VAULT_PATH>/llmzone/shared/scripts/index_rebuild.py --gh-sync >/dev/null 2>&1 || true",
             "async": true
           }
         ]
