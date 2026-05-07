@@ -70,32 +70,38 @@ else
 fi
 echo
 
-# ------------------------------------------------------------ Q2: slash command
+# ------------------------------------------------------------ Q2: slash commands
 
-bold "/vault-checkin slash command"
-echo "Installs ~/.claude/commands/vault-checkin.md so /vault-checkin works in Claude Code."
-TARGET="$HOME/.claude/commands/vault-checkin.md"
-if [[ -f "$TARGET" ]]; then
-    read -r -p "  $TARGET already exists — overwrite? [y/N]: " ans
-    if [[ "${ans:-N}" =~ ^[Yy]$ ]]; then
-        DO_SLASH=1
-    else
-        DO_SLASH=0
-    fi
+bold "Slash commands"
+echo "Each installs a /vault-<name> command in ~/.claude/commands/."
+COMMANDS_DIR="$HOME/.claude/commands"
+mkdir -p "$COMMANDS_DIR"
+
+# All slash commands shipped under snippets/ matching vault-*.md
+SLASH_FILES=()
+for f in "$SNIPPETS_DIR"/vault-*.md; do
+    [[ -f "$f" ]] && SLASH_FILES+=("$f")
+done
+
+if [[ ${#SLASH_FILES[@]} -eq 0 ]]; then
+    skip "no slash command snippets found"
 else
-    read -r -p "  Install /vault-checkin slash command? [Y/n]: " ans
+    # Default to install-all; allow per-file skip on conflict
+    read -r -p "  Install ${#SLASH_FILES[@]} slash command(s) into $COMMANDS_DIR? [Y/n]: " ans
     if [[ "${ans:-Y}" =~ ^[Yy]$ ]]; then
-        DO_SLASH=1
+        for src in "${SLASH_FILES[@]}"; do
+            base=$(basename "$src")
+            dest="$COMMANDS_DIR/$base"
+            if [[ -f "$dest" ]]; then
+                read -r -p "    $base already exists — overwrite? [y/N]: " a2
+                [[ "${a2:-N}" =~ ^[Yy]$ ]] || { skip "$base (kept existing)"; continue; }
+            fi
+            sed "s|<vault-root>|$VAULT_ROOT|g" "$src" > "$dest"
+            ok "installed /$( basename "$base" .md ) → $dest"
+        done
     else
-        DO_SLASH=0
+        skip "slash commands not installed"
     fi
-fi
-if [[ "$DO_SLASH" == "1" ]]; then
-    mkdir -p "$HOME/.claude/commands"
-    sed "s|<vault-root>|$VAULT_ROOT|g" "$SNIPPETS_DIR/vault-checkin.md" > "$TARGET"
-    ok "installed $TARGET"
-else
-    skip "slash command not installed"
 fi
 echo
 
