@@ -135,13 +135,13 @@ The cross-ref lists (`algorithms`, `decisions`, `prs`, etc.) drive the autogen R
 | Proposed → Implemented (algorithm) | **auto** | a `prs:` entry has `status: Merged` |
 | * → Superseded (algorithm/decision) | **auto** | another note's `supersedes:` / `superseded_by:` points here |
 | * → Reverted (algorithm) | **auto** | most recent `prs:` entry is `Reverted` |
-| Open → Merged (PR) | **human** | flip when GitHub merges (no `gh` integration in script) |
-| Merged → Reverted (PR) | **human** | flip when GitHub revert merges; new PR's `reverts:` field handles propagation |
+| Open → Merged (PR) | **auto** | `index_rebuild.py --gh-sync` (or `vault rebuild --gh-sync`) calls `gh pr view <num>` and overwrites the in-note `status:` and `branch:` to match GitHub |
+| Merged → Reverted (PR) | **auto** | new PR's `reverts: [<old-num>]` field flips the old PR's display to Reverted; the algorithm's display follows |
 | * → Deferred | **human** | work is paused indefinitely |
 | Proposed → Accepted (decision) | **human** | someone signs off |
 | Active → Outdated (runbook) | **human** | you ran the commands and they failed |
 
-The script writes a derived status badge into each note (between `<!-- AUTOGEN:status -->` markers) and surfaces derived state in the indices. Frontmatter `status:` is the human-curated baseline; the script does **not** overwrite it. Mismatches between baseline and derived produce a stderr warning.
+For most fields the script writes a derived status badge into each note (between `<!-- AUTOGEN:status -->` markers) and surfaces derived state in the indices, while leaving frontmatter `status:` as the human-curated baseline (mismatches produce stderr warnings). **PR notes are the exception under `--gh-sync`**: GitHub is treated as the source of truth, so `--gh-sync` overwrites the PR note's `status:` and `branch:` directly. Terminal in-note states (`Superseded`, `Reverted`, `Deprecated`, `Closed`) are still respected and never overridden by other derivation paths.
 
 ## Tag taxonomy
 
